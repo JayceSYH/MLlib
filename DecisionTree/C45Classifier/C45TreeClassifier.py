@@ -49,7 +49,7 @@ class C45TreeClassifier(object):
         """
         feature_names = df.columns.tolist()
         if label_name not in feature_names:
-            raise Exception("dataframe中没有叫{}的列".format(label_name))
+            raise Exception("no column named '{}' found".format(label_name))
         for feature_name in feature_names:
             if feature_name == label_name:
                 continue
@@ -143,8 +143,8 @@ class C45TreeClassifier(object):
         :return:
         """
         return C45Tree(feature.name, branch_type='continuous', split_point=split_point, class_dict={
-            "left":  df[df[feature.name] < split_point],
-            "right": df[df[feature.name] >= split_point]
+            "left":  df[df[feature.name] <= split_point],
+            "right": df[df[feature.name] > split_point]
         })
 
     def _split_feature(self, df, feature):
@@ -301,8 +301,8 @@ class C45TreeClassifier(object):
         """
         total_data_num = df.shape[0]
         
-        left_part = df[df[feature.name] < split_point]
-        right_part = df[df[feature.name] >= split_point]
+        left_part = df[df[feature.name] <= split_point]
+        right_part = df[df[feature.name] > split_point]
 
         if left_part.shape[0] == 0 or right_part.shape[0] == 0:
             return 0, 0
