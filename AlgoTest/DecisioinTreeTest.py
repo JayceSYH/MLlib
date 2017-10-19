@@ -5,7 +5,7 @@ from DecisionTree.Cart import CartTreeRegressor
 
 
 def NTestC45():
-    total_df = pd.read_csv("iris.csv")
+    total_df = pd.read_csv("iris.csv").sample(frac=1)
     total_num = total_df.shape[0]
     train_df = total_df.iloc[:int(total_num * 0.8)]
     test_df = total_df.iloc[int(total_num * 0.8):]
@@ -14,7 +14,7 @@ def NTestC45():
     print(c45.score(test_df))
 
 def NTestCart():
-    total_df = pd.read_csv("iris.csv")
+    total_df = pd.read_csv("iris.csv").sample(frac=1)
     total_num = total_df.shape[0]
     train_df = total_df.iloc[:int(total_num * 0.8)]
     test_df = total_df.iloc[int(total_num * 0.8):]
@@ -74,6 +74,7 @@ def sklearn_titanic():
     clf.fit(train_df.drop(['survived'], axis=1), train_df['survived'])
     print(clf.score(test_df.drop(['survived'], axis=1), test_df['survived']))
 
+
 def sklearn_titanic_regression():
     from sklearn.tree.tree import DecisionTreeRegressor
     from sklearn.preprocessing.label import LabelEncoder
@@ -95,6 +96,19 @@ def sklearn_titanic_regression():
     truth = test_df['fare']
     mse = np.sum(np.square(pred - truth)) / test_df.shape[0]
     print(mse)
+
+
+def NTestNormCart():
+    import numpy as np
+    from sklearn.svm import SVC
+    data = np.random.multivariate_normal([0, 0], [[1, 0], [0, 1]], size=1000)
+    y = np.array(list(map(lambda tp: 1 if tp[0] * 2 > tp[1] else -1, data)))
+    data = pd.DataFrame(data)
+    data[2] = y
+    cart = CartTreeClassifier()
+    cart.fit(data[:800], 2)
+    print(cart.score(data[800:]))
+
 
 if __name__ == "__main__":
     sklearn_titanic_regression()
