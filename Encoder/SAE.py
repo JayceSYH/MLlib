@@ -23,6 +23,12 @@ class SAE(object):
         self._KL = None
 
     def encoder(self, input_):
+        """
+        encoder layer function, used to encode input data
+        :param input_: input data placeholder
+        :return: encoded tensor
+        """
+
         next_input = None
         total_input = input_
 
@@ -40,10 +46,20 @@ class SAE(object):
         return next_input
 
     def encoder_as_input(self):
+        """
+        create a placeholder for input data and encode it
+        :return: input data placeholder, encoded tensor
+        """
         self._encoder_input = tf.placeholder(tf.float32, (None, self._input_size))
         return self._encoder_input, self.encoder(self._encoder_input)
 
     def decoder(self, input_, origin_input):
+        """
+        decoder function layer, used to decode encoded tensor
+        :param input_: encoded tensor
+        :param origin_input: origin input data placeholder
+        :return: decoded tensor
+        """
         next_input = input_
         last_no = len(self._ae_list) - 1
         train_process = None
@@ -60,6 +76,12 @@ class SAE(object):
         return train_process, next_input
 
     def train(self, X, n_steps=50):
+        """
+        train a stacked sparsity auto encoder with strict to that previous layers have already been trained
+        :param X: training data
+        :param n_steps: iter steps
+        :return: None
+        """
         input_, output_ = self.encoder_as_input()
         train_process_, _ = self.decoder(output_, input_)
         with tf.Session() as sess:
@@ -94,6 +116,13 @@ class SAE(object):
 
     @staticmethod
     def auto_stack(ae_list, X, n_steps=1000):
+        """
+        automatically train stacked sparsity auto encoder layer by layer
+        :param ae_list: auto encoder list
+        :param X: training data
+        :param n_steps: iter steps
+        :return: stacked sparsity auto encoder
+        """
         for i in range(len(ae_list)):
             print("total {0} layers, training layer {1}".format(len(ae_list), i + 1))
             train_sae = SAE(ae_list[:i + 1])
@@ -101,7 +130,6 @@ class SAE(object):
 
             if i == len(ae_list) - 1:
                 return train_sae
-
 
 
 if __name__ == "__main__":

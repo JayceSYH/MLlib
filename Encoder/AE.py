@@ -6,6 +6,18 @@ import math
 class AE(object):
     def __init__(self, input_size, output_size, activation="tanh", loss="mse",
                  optimizer="gd", p=0.2, beta=1.0, C=1.0, learning_rate=0.01):
+        """
+        Sparsity AutoEncoder
+        :param input_size: input size of the encoder
+        :param output_size: output size of the encoder
+        :param activation: activation function of the encoder
+        :param loss: loss function of the encoder
+        :param optimizer: optimizer of the encoder
+        :param p: sparsity portion of the encoder
+        :param beta: KL divergence weight of the loss function
+        :param C: Regularization weight of the loss function
+        :param learning_rate: learning rate of the optimizer(only gradient descent)
+        """
         # net structure
         self._input_size = input_size
         self._output_size = output_size
@@ -46,6 +58,11 @@ class AE(object):
         self._train_process = None
 
     def encoder(self, prev_layer):
+        """
+        encoder layer function, used to encode prev layer or input date
+        :param prev_layer: a placeholder of input date or output tensor of previous layer
+        :return: encoded tensor
+        """
         _input = prev_layer
 
         a_out = tf.matmul(_input, self._encoder_w) + self._encoder_offset
@@ -75,10 +92,19 @@ class AE(object):
         return self._encoder_output
 
     def encoder_as_input(self):
+        """
+        create an input placeholder and encode it
+        :return: input placeholder, encoded tensor
+        """
         self._encoder_input = tf.placeholder(tf.float32, (None, self._input_size))
         return self._encoder_input, self.encoder(self._encoder_input)
 
     def decoder(self, prev_layer):
+        """
+        decode an encoded tensor
+        :param prev_layer: an encoded tensor of previous layer
+        :return: decoded tensor
+        """
         _input = prev_layer
 
         a_out = tf.matmul(_input, self._decoder_w) + self._decoder_offset
@@ -98,6 +124,15 @@ class AE(object):
         return self._decoder_output
 
     def decoder_as_output(self, prev_layer, origin_input, kl_list, lxs=None, total_weight_num=None):
+        """
+        decode an encoded tensor and calculate the loss, then use optimizer to minimize it
+        :param prev_layer: tensor of previous layer
+        :param origin_input: origin input data of encoder
+        :param kl_list: list of KL divergence of different layers
+        :param lxs: regulation term(L1 or L2 or both)
+        :param total_weight_num: total number of network weight node, needed if lxs is passed
+        :return: training tensor, output tensor
+        """
         self.decoder(prev_layer)
 
         # calculate mse loss
